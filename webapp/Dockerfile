@@ -5,11 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN useradd --system --no-create-home appuser
 
-COPY . .
+COPY requirements.txt .
+RUN pip install --no-cache-dir --require-hashes --only-binary :all: -r requirements.txt
+
+COPY app.py .
+
+USER appuser
 
 EXPOSE 8000
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "app:app"]
