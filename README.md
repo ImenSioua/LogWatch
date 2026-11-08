@@ -32,6 +32,19 @@ Encadrant : M. Mohamed Najeh Issaoui - Réalisé par : Imen Sioua
 
         docker compose ps
 
+## Configuration (fichier .env)
+
+Toutes les valeurs sensibles sont lues depuis le fichier `.env`, qui n'est jamais versionné. Le modèle `.env.example` liste les variables :
+
+| Variable | Rôle |
+|---|---|
+| `STACK_VERSION` | Version d'Elasticsearch, Logstash et Kibana (8.15.3) |
+| `MONGO_INITDB_ROOT_USERNAME` | Nom de l'administrateur MongoDB |
+| `MONGO_INITDB_ROOT_PASSWORD` | Mot de passe de l'administrateur MongoDB |
+| `REDIS_PASSWORD` | Mot de passe de Redis |
+| `FLASK_SECRET_KEY` | Clé secrète de l'application Flask (sessions, protection CSRF) |
+| `MAX_UPLOAD_SIZE_MB` | Taille maximale d'un fichier de logs envoyé (en Mo) |
+
 ## Services et accès
 
 | Service | Rôle | Accès |
