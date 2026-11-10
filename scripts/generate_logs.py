@@ -1,7 +1,8 @@
 """Generateur de logs factices pour LogWatch (LW-37).
 
 Produit un fichier JSON Lines (une ligne = un log) lu ensuite par Logstash.
-Exemple : python scripts/generate_logs.py --count 1000 --output data/logs/app.log
+Exemple : python scripts/generate_logs.py --count 1000
+Le fichier est toujours ecrit dans data/logs/app.log.
 """
 import argparse
 import json
@@ -10,6 +11,9 @@ import random
 from datetime import datetime, timedelta, timezone
 
 from faker import Faker
+
+OUTPUT_FILE = os.path.join("data", "logs", "app.log")
+MAX_COUNT = 100000
 
 SERVICES = ["webapp", "mongodb", "redis", "elasticsearch", "logstash", "nginx"]
 LEVELS = ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
@@ -23,34 +27,36 @@ MESSAGES = {
     "CRITICAL": ["Service indisponible", "Espace disque insuffisant"],
 }
 
+rng = random.SystemRandom()
+
 
 def make_log(fake, now):
-    level = random.choices(LEVELS, weights=WEIGHTS)[0]
-    moment = now - timedelta(seconds=random.randint(0, 24 * 3600))
+    level = rng.choices(LEVELS, weights=WEIGHTS)[0]
+    moment = now - timedelta(seconds=rng.randint(0, 24 * 3600))
     return {
         "timestamp": moment.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "level": level,
-        "service": random.choice(SERVICES),
-        "message": random.choice(MESSAGES[level]),
+        "service": rng.choice(SERVICES),
+        "message": rng.choice(MESSAGES[level]),
         "ip": fake.ipv4(),
         "user": fake.user_name(),
-        "response_time_ms": random.randint(5, 3000),
+        "response_time_ms": rng.randint(5, 3000),
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generateur de logs factices")
-    parser.add_argument("--count", type=int, default=1000, help="nombre de logs")
-    parser.add_argument("--output", default="data/logs/app.log", help="fichier de sortie")
+    parser.add_argument("--count", type=int, default=1000, help="nombre de logs (max 100000)")
     args = parser.parse_args()
+    count = max(1, min(args.count, MAX_COUNT))
 
     fake = Faker()
     now = datetime.now(timezone.utc)
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
-    with open(args.output, "w", encoding="utf-8") as out:
-        for _ in range(args.count):
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as out:
+        for _ in range(count):
             out.write(json.dumps(make_log(fake, now)) + "\n")
-    print(f"{args.count} logs ecrits dans {args.output}")
+    print(f"{count} logs ecrits dans {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
