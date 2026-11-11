@@ -50,7 +50,7 @@ services:
       - "9600:9600"
     volumes:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
-      - logs_input:/data/logs_input
+      - ./data/logs:/data/logs_input:ro
     networks:
       - elk-net
     depends_on:
@@ -128,4 +128,3 @@ volumes:
   es_data:
   mongo_data:
   redis_data:
-  logs_input:
